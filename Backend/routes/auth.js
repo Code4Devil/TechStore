@@ -56,7 +56,6 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// Profile route
 router.get('/profile', async (req, res) => {
   try {
     const email = req.query.email;
@@ -66,15 +65,13 @@ router.get('/profile', async (req, res) => {
 
     const user = await User.findOne({ email })
       .populate('cart.product')
-      .populate('wishlist');
+      .select('-password'); // Exclude password
     
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    const userResponse = user.toObject();
-    delete userResponse.password;
-    res.json(userResponse);
+    res.json(user);
   } catch (error) {
     console.error('Error fetching profile:', error);
     res.status(500).json({ error: error.message });

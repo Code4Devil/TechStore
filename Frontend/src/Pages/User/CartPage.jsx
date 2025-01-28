@@ -90,7 +90,6 @@ const CartPage = () => {
       if (!response.ok) throw new Error('Failed to remove item');
   
       setCartItems(prevItems => prevItems.filter(item => item.product._id !== productId));
-      updateCounts();
       toast.success('Item removed from cart');
     } catch (error) {
       console.error('Error removing item:', error);

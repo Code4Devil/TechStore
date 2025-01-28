@@ -94,7 +94,7 @@ const UserSignup = () => {
             </div>
             <div className="md:w-1/2 bg-neutral-700 p-8" id="el-74k05q27">
               <div className="h-full flex flex-col justify-center" id="el-izxhlk9h">
-                <h3 className="text-2xl font-bold text-white mb-4 animate__animated animate__fadeInRight" id="el-b4q30203">Welcome to ShopEase</h3>
+                <h3 className="text-2xl font-bold text-white mb-4 animate__animated animate__fadeInRight" id="el-b4q30203">Welcome to TechStore</h3>
                 <ul className="text-gray-300 space-y-4" id="el-evx23rkt">
                   <li className="flex items-center" id="el-kmclusev">
                     <svg className="w-5 h-5 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" id="el-b3oacvhu">
