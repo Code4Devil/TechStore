@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: ecommerce-backend
+    env: node
+    buildCommand: npm install
+    startCommand: node server-test.js
+    envVars:
+      - key: MONGO_URI
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: PORT
+        value: 10000
+      - key: ALLOWED_ORIGINS
+        sync: false
