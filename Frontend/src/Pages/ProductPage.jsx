@@ -4,6 +4,7 @@ import { useProduct } from '../Context/ProductContext';
 import { useCart } from '../Context/Cart';
 import Nav from '../Components/Nav';
 import { toast } from 'react-toastify';
+import { getProductIconByType, getIconColorByType } from '../utils/productIcons';
 
 const ProductPage = () => {
   const { id } = useParams();
@@ -12,7 +13,7 @@ const ProductPage = () => {
   const { addToCart, cartItems } = useCart();
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
-  
+
   // Check if product is already in cart
   const isInCart = cartItems?.some(item => item.product._id === product?._id);
 
@@ -76,22 +77,32 @@ const ProductPage = () => {
           <div className="flex flex-col md:flex-row gap-8">
             {/* Product Images Gallery */}
             <div className="md:w-1/2">
-              <div className="product-gallery">
-                <div className="main-image bg-neutral-100 rounded-lg p-4 mb-4">
+              <div className="product-gallery sticky top-24">
+                <div className="main-image bg-neutral-100 rounded-lg p-6 mb-4">
                   <div className="aspect-w-1 aspect-h-1">
                     <div className="w-full h-full flex items-center justify-center">
                       {product.image?.startsWith('fas') ? (
                         <i className={`${product.image} text-6xl text-gray-400`}></i>
-                      ) : (
-                        <img 
-                          src={product.image} 
-                          alt={product.name} 
+                      ) : product.image ? (
+                        <img
+                          src={product.image}
+                          alt={product.name}
                           className="w-full h-full object-cover rounded-lg"
                           onError={(e) => {
                             e.target.onerror = null;
-                            e.target.src = '/fallback-image.jpg';
+                            // Replace with category-specific icon when image fails to load
+                            e.target.style.display = 'none';
+                            // Add icon element after the image
+                            const iconElement = document.createElement('i');
+                            const iconClass = getProductIconByType(product.type);
+                            const colorClass = getIconColorByType(product.type);
+                            iconElement.className = `${iconClass} text-6xl ${colorClass}`;
+                            e.target.parentNode.appendChild(iconElement);
                           }}
                         />
+                      ) : (
+                        // No image provided, use category icon
+                        <i className={`${getProductIconByType(product.type)} text-6xl ${getIconColorByType(product.type)}`}></i>
                       )}
                     </div>
                   </div>
@@ -101,15 +112,15 @@ const ProductPage = () => {
 
             {/* Product Details */}
             <div className="md:w-1/2">
-              <h1 className="text-3xl font-bold text-neutral-900 mb-4">
+              <h1 className="text-2xl md:text-3xl font-bold text-neutral-900 mb-4">
                 {product.name}
               </h1>
-              
+
               <div className="flex items-center mb-4">
                 <div className="flex text-yellow-400">
                   {[...Array(5)].map((_, i) => (
-                    <svg 
-                      key={i} 
+                    <svg
+                      key={i}
                       className={`w-5 h-5 ${i < Math.floor(product.rating || 0) ? 'text-yellow-400' : 'text-gray-300'}`}
                       fill="currentColor"
                       viewBox="0 0 20 20"
@@ -152,8 +163,8 @@ const ProductPage = () => {
                 <button
                   onClick={handleAddToCart}
                   className={`flex-1 py-2 px-6 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 ${
-                    isInCart 
-                      ? 'bg-green-600 hover:bg-green-700 focus:ring-green-500' 
+                    isInCart
+                      ? 'bg-green-600 hover:bg-green-700 focus:ring-green-500'
                       : 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500'
                   } text-white transition-colors duration-200`}
                   disabled={isInCart}

@@ -2,7 +2,10 @@ const mongoose = require('mongoose');
 
 const productSchema = new mongoose.Schema({
   name: String,
-  
+  description: {
+    type: String,
+    default: ''
+  },
   originalPrice: Number,
   rating: Number,
   reviews: Number,
@@ -20,8 +23,23 @@ const productSchema = new mongoose.Schema({
     type: Number,
     default: 1
   },
-  
-  type: String // Add the type field
+  type: String, // phone, laptop, tablet, etc.
+  retailer: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Retailer'
+  },
+  isActive: {
+    type: Boolean,
+    default: true
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now
+  }
 });
 
 const Product = mongoose.model('Product', productSchema);

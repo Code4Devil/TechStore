@@ -11,19 +11,19 @@ const SearchSuggestions = ({
   if (!showSuggestions || searchQuery.length < 2) return null;
 
   return (
-    <div className="absolute w-full mt-1 bg-white border rounded-lg shadow-lg z-[60] max-h-[300px] overflow-y-auto">
+    <div className="absolute w-full left-0 mt-1 bg-white border rounded-lg shadow-lg z-[999] max-h-[300px] overflow-y-auto">
       {isLoading ? (
         <div className="px-4 py-2 text-gray-500">
           <i className="fas fa-spinner fa-spin mr-2"></i>
           Loading...
         </div>
       ) : suggestions && suggestions.length > 0 ? (
-        <ul className="py-2 divide-y divide-gray-100">
+        <ul className="py-2 divide-y divide-gray-100 touch-auto">
           {suggestions.slice(0, 5).map((suggestion) => (
             <li
               key={suggestion._id}
               onClick={() => handleSuggestionClick(suggestion)}
-              className="px-4 py-2 hover:bg-gray-50 cursor-pointer transition-colors duration-150"
+              className="px-4 py-4 hover:bg-gray-50 cursor-pointer transition-colors duration-150 touch-manipulation active:bg-gray-100"
             >
               <div className="flex items-center gap-3">
                 <i className={`fas ${suggestion.image || 'fa-box'} text-gray-400 w-6 text-center`}></i>

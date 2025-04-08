@@ -160,4 +160,60 @@ router.delete('/cart/:productId', async (req, res) => {
   }
 });
 
+// Add this route to get user orders
+router.get('/orders', async (req, res) => {
+  try {
+    const { email } = req.query;
+    if (!email) {
+      return res.status(400).json({ error: 'Email is required' });
+    }
+
+    const user = await User.findOne({ email })
+      .populate('orders.items.product')
+      .select('orders');
+    
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json(user.orders);
+  } catch (error) {
+    console.error('Error fetching orders:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Create a new order
+router.post('/orders', async (req, res) => {
+  try {
+    const { email, items, shippingAddress, totalAmount, status } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const order = {
+      items,
+      shippingAddress,
+      totalAmount,
+      status,
+      createdAt: new Date()
+    };
+
+    user.orders = user.orders || [];
+    user.orders.push(order);
+    await user.save();
+
+    // Clear the user's cart
+    user.cart = [];
+    await user.save();
+
+    res.status(201).json(order);
+  } catch (error) {
+    console.error('Error creating order:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 module.exports = router;

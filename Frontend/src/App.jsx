@@ -5,6 +5,7 @@ import { AuthProvider } from './Context/AuthContext';
 import { CartProvider } from './Context/Cart';
 import { ProductProvider } from './Context/ProductContext';
 import { SearchProvider } from './Context/SearchContext';
+import { RetailerProvider } from './Context/RetailerContext';
 import LoginPage from './Pages/User/LoginPage';
 import UserSignup from './Pages/User/UserSignup';
 import MainPage from './Pages/MainPage';
@@ -17,23 +18,30 @@ import CartPage from './Pages/user/CartPage';
 import SearchResults from './Pages/SearchResults';
 import ProductPage from './Pages/ProductPage';
 import { useAuth } from './Context/AuthContext';
+import { useRetailer } from './Context/RetailerContext';
 import {useEffect} from 'react';
+import ProfilePage from './Pages/User/ProfilePage';
 
-
-
-
+// Retailer pages
+import RetailerLogin from './Pages/Retailer/RetailerLogin';
+import RetailerRegister from './Pages/Retailer/RetailerRegister';
+import RetailerDashboard from './Pages/Retailer/RetailerDashboard';
+import ProductList from './Pages/Retailer/ProductList';
+import ProductForm from './Pages/Retailer/ProductForm';
+import OrderList from './Pages/Retailer/OrderList';
+import OrderDetail from './Pages/Retailer/OrderDetail';
 
 const App = () => {
 
   const ProtectedRoute = ({ children }) => {
     const { user, loading, checkAuthStatus } = useAuth();
-    
+
     useEffect(() => {
       if (!user && !loading) {
         checkAuthStatus();
       }
     }, [user, loading]);
-  
+
     if (loading) {
       return (
         <div className="min-h-screen flex items-center justify-center">
@@ -41,21 +49,41 @@ const App = () => {
         </div>
       );
     }
-  
+
     if (!user && !loading) {
       return <Navigate to="/" replace />;
     }
-  
+
+    return children;
+  };
+
+  // Protected route for retailers
+  const RetailerProtectedRoute = ({ children }) => {
+    const { retailer, loading } = useRetailer();
+
+    if (loading) {
+      return (
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+        </div>
+      );
+    }
+
+    if (!retailer && !loading) {
+      return <Navigate to="/retailer/login" replace />;
+    }
+
     return children;
   };
 
   return (
     <AuthProvider>
-      <ProductProvider>
-        <CartProvider>
-          <SearchProvider>
-            <div className='overflow-x-hidden'>
-              <Routes>
+      <RetailerProvider>
+        <ProductProvider>
+          <CartProvider>
+            <SearchProvider>
+              <div className='overflow-x-hidden'>
+                <Routes>
                 <Route path="/" element={<LoginPage />} />
                 <Route path="/signup" element={<UserSignup />} />
                 {/* Protected Routes */}
@@ -68,11 +96,23 @@ const App = () => {
                 <Route path="/cart" element={<ProtectedRoute><CartPage /></ProtectedRoute>} />
                 <Route path="/search" element={<ProtectedRoute><SearchResults /></ProtectedRoute>} />
                 <Route path="/product/:id" element={<ProtectedRoute><ProductPage /></ProtectedRoute>} />
-              </Routes>
-            </div>
-          </SearchProvider>
-        </CartProvider>
-      </ProductProvider>
+                <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+
+                  {/* Retailer Routes */}
+                  <Route path="/retailer/login" element={<RetailerLogin />} />
+                  <Route path="/retailer/register" element={<RetailerRegister />} />
+                  <Route path="/retailer/dashboard" element={<RetailerProtectedRoute><RetailerDashboard /></RetailerProtectedRoute>} />
+                  <Route path="/retailer/products" element={<RetailerProtectedRoute><ProductList /></RetailerProtectedRoute>} />
+                  <Route path="/retailer/products/new" element={<RetailerProtectedRoute><ProductForm /></RetailerProtectedRoute>} />
+                  <Route path="/retailer/products/:productId" element={<RetailerProtectedRoute><ProductForm /></RetailerProtectedRoute>} />
+                  <Route path="/retailer/orders" element={<RetailerProtectedRoute><OrderList /></RetailerProtectedRoute>} />
+                  <Route path="/retailer/orders/:orderId" element={<RetailerProtectedRoute><OrderDetail /></RetailerProtectedRoute>} />
+                </Routes>
+              </div>
+            </SearchProvider>
+          </CartProvider>
+        </ProductProvider>
+      </RetailerProvider>
     </AuthProvider>
   );
 };

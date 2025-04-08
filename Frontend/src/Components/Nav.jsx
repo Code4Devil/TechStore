@@ -20,8 +20,14 @@ const Nav = () => {
       }
     };
 
+    // Use both mousedown and touchend for better mobile support
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener('touchend', handleClickOutside);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchend', handleClickOutside);
+    };
   }, []);
 
   const handleSubmit = (e) => {
@@ -30,7 +36,7 @@ const Nav = () => {
       handleSearch(searchQuery);
       setShowSuggestions(false);
       setIsMobileSearchOpen(false);
-      navigate(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
+      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
     }
   };
 
@@ -38,11 +44,11 @@ const Nav = () => {
     setSearchQuery(suggestion.name);
     handleSearch(suggestion.name);
     setShowSuggestions(false);
-    navigate(`/products?search=${encodeURIComponent(suggestion.name)}`);
+    navigate(`/search?q=${encodeURIComponent(suggestion.name)}`);
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 bg-white shadow-md z-50">
+    <header className="fixed top-0 left-0 right-0 bg-white shadow-lg z-50 transition-all duration-300 backdrop-filter backdrop-blur-lg bg-opacity-90">
       {/* Top Bar */}
       <div className="hidden md:block border-b">
         <div className="max-w-7xl mx-auto px-4">
@@ -70,30 +76,34 @@ const Nav = () => {
 
           {/* Desktop Search */}
           <div className="hidden md:block flex-1 max-w-xl mx-8" ref={searchRef}>
-            <form onSubmit={handleSubmit} className="relative">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onFocus={() => setShowSuggestions(true)}
-                placeholder="Search products..."
-                className="w-full pl-4 pr-10 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
-              />
-              <button
-                type="submit"
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-600"
-              >
-                <i className={`fa-solid fa-magnifying-glass ${isLoading ? 'animate-spin' : ''}`}></i>
-              </button>
+            <div className="relative">
+              <form onSubmit={handleSubmit} className="relative">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onFocus={() => setShowSuggestions(true)}
+                  placeholder="Search products..."
+                  className="w-full pl-4 pr-10 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+                />
+                <button
+                  type="submit"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-600"
+                >
+                  <i className={`fa-solid fa-magnifying-glass ${isLoading ? 'animate-spin' : ''}`}></i>
+                </button>
+              </form>
 
-              <SearchSuggestions
-                showSuggestions={showSuggestions}
-                searchQuery={searchQuery}
-                suggestions={suggestions}
-                isLoading={isLoading}
-                handleSuggestionClick={handleSuggestionClick}
-              />
-            </form>
+              <div className="relative">
+                <SearchSuggestions
+                  showSuggestions={showSuggestions}
+                  searchQuery={searchQuery}
+                  suggestions={suggestions}
+                  isLoading={isLoading}
+                  handleSuggestionClick={handleSuggestionClick}
+                />
+              </div>
+            </div>
           </div>
 
           {/* Icons */}
@@ -107,8 +117,11 @@ const Nav = () => {
 
             <Link to="/cart" className="relative hover:text-blue-600">
               <i className="fa-solid fa-cart-shopping text-xl"></i>
-             
-            
+              {cartCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                  {cartCount}
+                </span>
+              )}
             </Link>
 
             <Link to="/profile" className="hidden md:block hover:text-blue-600">
@@ -126,7 +139,7 @@ const Nav = () => {
 
         {/* Navigation */}
         <nav className={`${isMobileMenuOpen ? 'block' : 'hidden'} md:block border-t`}>
-          <ul className="flex flex-col md:flex-row justify-center space-y-2 md:space-y-0 md:space-x-8 py-4">
+          <ul className="flex flex-col md:flex-row justify-center space-y-2 md:space-y-0 md:space-x-8 py-4 md:py-3">
             <li><Link to="/home" className="hover:text-blue-600">Home</Link></li>
             <li><Link to="/laptops" className="hover:text-blue-600">Laptops</Link></li>
             <li><Link to="/phones" className="hover:text-blue-600">Smartphones</Link></li>
@@ -137,30 +150,35 @@ const Nav = () => {
 
         {/* Mobile Search */}
         <div className={`${isMobileSearchOpen ? 'block' : 'hidden'} md:hidden border-t py-4`}>
-          <form onSubmit={handleSubmit} className="relative">
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onFocus={() => setShowSuggestions(true)}
-              placeholder="Search products..."
-              className="w-full pl-4 pr-10 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
-            />
-            <button
-              type="submit"
-              className="absolute right-3 top-1/2 -translate-y-1/2"
-            >
-              <i className="fa-solid fa-magnifying-glass text-gray-400"></i>
-            </button>
+          <div className="relative" ref={searchRef}>
+            <form onSubmit={handleSubmit} className="relative">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => setShowSuggestions(true)}
+                placeholder="Search products..."
+                className="w-full pl-4 pr-10 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+              />
+              <button
+                type="submit"
+                className="absolute right-3 top-1/2 -translate-y-1/2"
+              >
+                <i className="fa-solid fa-magnifying-glass text-gray-400"></i>
+              </button>
+            </form>
 
-            <SearchSuggestions
-              showSuggestions={showSuggestions}
-              searchQuery={searchQuery}
-              suggestions={suggestions}
-              isLoading={isLoading}
-              handleSuggestionClick={handleSuggestionClick}
-            />
-          </form>
+            {/* Position the suggestions inside the ref container for proper mobile interaction */}
+            <div className="relative">
+              <SearchSuggestions
+                showSuggestions={showSuggestions}
+                searchQuery={searchQuery}
+                suggestions={suggestions}
+                isLoading={isLoading}
+                handleSuggestionClick={handleSuggestionClick}
+              />
+            </div>
+          </div>
         </div>
       </div>
     </header>

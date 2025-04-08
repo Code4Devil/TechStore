@@ -1,6 +1,7 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import config from '../config';
 
 const AuthContext = createContext();
 
@@ -21,7 +22,7 @@ export const AuthProvider = ({ children }) => {
         return;
       }
 
-      const response = await fetch(`http://localhost:5000/api/auth/profile?email=${email}`);
+      const response = await fetch(`${config.API_URL}/api/auth/profile?email=${email}`);
       if (!response.ok) {
         throw new Error('Failed to fetch profile');
       }
@@ -38,19 +39,19 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const response = await fetch('http://localhost:5000/api/auth/login', {
+      const response = await fetch(`${config.API_URL}/api/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ email, password })
       });
-      
+
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.error || 'Login failed');
       }
-      
+
       const data = await response.json();
       localStorage.setItem('userEmail', data.email);
       setUser(data);
@@ -64,19 +65,19 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (name, email, password) => {
     try {
-      const response = await fetch('http://localhost:5000/api/auth/register', {
+      const response = await fetch(`${config.API_URL}/api/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ name, email, password })
       });
-      
+
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.error || 'Registration failed');
       }
-      
+
       toast.success('Registration successful');
       await login(email, password);
     } catch (error) {

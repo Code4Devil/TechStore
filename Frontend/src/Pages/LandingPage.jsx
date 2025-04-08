@@ -6,7 +6,7 @@ const LandingPage = () => {
   return (
     <div className=''>
      
-      <section id="hero" className="pt-24 md:pt-32 bg-gradient-to-r from-blue-50 to-indigo-50">
+      <section id="hero" className="pt-32 md:pt-32 bg-gradient-to-r from-blue-50 to-indigo-50">
         <div className="max-w-7xl mx-auto px-4 py-12 md:py-20">
           <div className="grid md:grid-cols-2 gap-8 items-center">
             <div className="space-y-6 text-center md:text-left">

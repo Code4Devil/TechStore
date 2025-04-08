@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useProduct } from '../Context/ProductContext';
 import { useCart } from '../Context/Cart';
 import { toast } from 'react-toastify';
+import { getProductIconByType, getIconColorByType } from '../utils/productIcons';
 
 const ProductCard = ({ product }) => {
   const { setProduct } = useProduct();
@@ -19,7 +20,7 @@ const ProductCard = ({ product }) => {
   const handleAddToCart = async (e) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     setIsAddingToCart(true);
     try {
       const success = await addToCart(product._id);
@@ -40,23 +41,33 @@ const ProductCard = ({ product }) => {
   const reviews = product.reviews || 0;
 
   return (
-    <div className="group bg-white rounded-xl shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden">
-      <div onClick={handleProductClick} className="block cursor-pointer">
+    <div className="group bg-white rounded-xl shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden h-full flex flex-col">
+      <div onClick={handleProductClick} className="block cursor-pointer flex-grow">
         <div className="relative">
           <div className="aspect-w-1 aspect-h-1 bg-gray-100">
-            <div className="w-full h-full py-8 flex items-center justify-center">
+            <div className="w-full h-full py-6 flex items-center justify-center">
               {isIcon ? (
                 <i className={`${product.image} text-4xl text-gray-400`}></i>
-              ) : (
-                <img 
-                  src={product.image} 
-                  alt={product.name} 
+              ) : product.image ? (
+                <img
+                  src={product.image}
+                  alt={product.name}
                   className="w-full h-full object-cover"
                   onError={(e) => {
                     e.target.onerror = null;
-                    e.target.src = 'fallback-image.jpg';
+                    // Replace with category-specific icon when image fails to load
+                    e.target.style.display = 'none';
+                    // Add icon element after the image
+                    const iconElement = document.createElement('i');
+                    const iconClass = getProductIconByType(product.type);
+                    const colorClass = getIconColorByType(product.type);
+                    iconElement.className = `${iconClass} text-5xl ${colorClass}`;
+                    e.target.parentNode.appendChild(iconElement);
                   }}
                 />
+              ) : (
+                // No image provided, use category icon
+                <i className={`${getProductIconByType(product.type)} text-5xl ${getIconColorByType(product.type)}`}></i>
               )}
             </div>
           </div>
@@ -68,28 +79,28 @@ const ProductCard = ({ product }) => {
         </div>
 
         <div className="p-4">
-          <div className="flex items-center gap-2 mb-2">
+          <div className="flex items-center gap-2 mb-2 min-h-[24px]">
             {product.isNew && (
               <span className="bg-green-100 text-green-600 text-xs px-2 py-1 rounded">
                 New
               </span>
             )}
-            <span className="text-sm text-gray-500">{product.brand}</span>
+            <span className="text-sm text-gray-500 truncate">{product.brand}</span>
           </div>
 
-          <h3 className="font-semibold text-lg mb-2 text-gray-900 line-clamp-2">
+          <h3 className="font-semibold text-lg mb-2 text-gray-900 line-clamp-2 min-h-[56px]">
             {product.name}
           </h3>
 
-          <div className="flex items-center gap-2 mb-2">
+          <div className="flex items-center gap-2 mb-2 min-h-[20px]">
             <div className="flex text-yellow-400 text-sm">
               {[...Array(5)].map((_, i) => (
-                <i 
-                  key={i} 
-                  className={`fas ${i < Math.floor(rating) 
-                    ? 'fa-star' 
-                    : i < rating 
-                    ? 'fa-star-half-alt' 
+                <i
+                  key={i}
+                  className={`fas ${i < Math.floor(rating)
+                    ? 'fa-star'
+                    : i < rating
+                    ? 'fa-star-half-alt'
                     : 'fa-star text-gray-300'
                   }`}
                 ></i>
@@ -98,7 +109,7 @@ const ProductCard = ({ product }) => {
             <span className="text-sm text-gray-500">({reviews})</span>
           </div>
 
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-2 min-h-[28px]">
             <div className="flex items-center gap-2">
               <span className="text-xl font-bold text-gray-900">
                 ${product.price?.toFixed(2)}
@@ -110,7 +121,7 @@ const ProductCard = ({ product }) => {
               )}
             </div>
             {product.quantity <= 5 && product.quantity > 0 && (
-              <span className="text-sm text-orange-500">
+              <span className="text-sm text-orange-500 whitespace-nowrap">
                 Only {product.quantity} left
               </span>
             )}
@@ -123,10 +134,10 @@ const ProductCard = ({ product }) => {
           onClick={handleAddToCart}
           disabled={isAddingToCart || product.quantity === 0}
           className={`w-full px-4 py-2 rounded-lg transition-colors ${
-            product.quantity === 0 
-              ? 'bg-gray-400 cursor-not-allowed' 
-              : isAddingToCart 
-              ? 'bg-blue-400 cursor-wait' 
+            product.quantity === 0
+              ? 'bg-gray-400 cursor-not-allowed'
+              : isAddingToCart
+              ? 'bg-blue-400 cursor-wait'
               : 'bg-blue-600 hover:bg-blue-700'
           } text-white font-medium`}
         >

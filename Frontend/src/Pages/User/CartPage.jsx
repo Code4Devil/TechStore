@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import Nav from '../../Components/Nav';
 import { toast } from 'react-toastify';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../../Context/Cart';
+import CheckoutModal from '../../Components/CheckoutModal';
 
 const CartPage = () => {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
-  const { updateCounts } = useCart();
+  const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
+  const navigate = useNavigate();
+  const { updateCounts, clearCart } = useCart();
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -21,15 +24,15 @@ const CartPage = () => {
         setLoading(false);
         return;
       }
-  
+
       const response = await fetch(`http://localhost:5000/api/auth/profile?email=${email}`);
       if (!response.ok) throw new Error('Failed to fetch cart items');
-      
+
       const data = await response.json();
       if (!data || !data.cart) {
         throw new Error('Cart data not found');
       }
-      
+
       setCartItems(data.cart);
     } catch (error) {
       console.error('Error fetching cart items:', error);
@@ -38,17 +41,17 @@ const CartPage = () => {
       setLoading(false);
     }
   };
-  
+
   const handleQuantityChange = async (productId, newQuantity) => {
     if (newQuantity < 1) return;
-    
+
     try {
       const email = localStorage.getItem('userEmail');
       if (!email) {
         toast.error('Please login first');
         return;
       }
-  
+
       const response = await fetch(`http://localhost:5000/api/auth/cart/${productId}`, {
         method: 'PUT',
         headers: {
@@ -56,11 +59,11 @@ const CartPage = () => {
         },
         body: JSON.stringify({ email, quantity: newQuantity })
       });
-  
+
       if (!response.ok) throw new Error('Failed to update quantity');
-  
-      setCartItems(cartItems.map(item => 
-        item.product._id === productId 
+
+      setCartItems(cartItems.map(item =>
+        item.product._id === productId
           ? { ...item, quantity: newQuantity }
           : item
       ));
@@ -70,7 +73,7 @@ const CartPage = () => {
       toast.error('Failed to update quantity');
     }
   };
-  
+
   const handleRemoveItem = async (productId) => {
     try {
       const email = localStorage.getItem('userEmail');
@@ -78,7 +81,7 @@ const CartPage = () => {
         toast.error('Please login first');
         return;
       }
-  
+
       const response = await fetch(`http://localhost:5000/api/auth/cart/${productId}`, {
         method: 'DELETE',
         headers: {
@@ -86,9 +89,9 @@ const CartPage = () => {
         },
         body: JSON.stringify({ email })
       });
-  
+
       if (!response.ok) throw new Error('Failed to remove item');
-  
+
       setCartItems(prevItems => prevItems.filter(item => item.product._id !== productId));
       toast.success('Item removed from cart');
     } catch (error) {
@@ -113,8 +116,8 @@ const CartPage = () => {
       <i className="fas fa-shopping-cart text-6xl text-gray-300 mb-4"></i>
       <h3 className="text-2xl font-semibold text-gray-700 mb-4">Your cart is empty</h3>
       <p className="text-gray-500 mb-8">Looks like you haven't added any items yet.</p>
-      <Link 
-        to="/" 
+      <Link
+        to="/"
         className="inline-block bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition duration-300"
       >
         Continue Shopping
@@ -122,12 +125,93 @@ const CartPage = () => {
     </div>
   );
 
+  const handleCheckout = async (addressData) => {
+    try {
+      const email = localStorage.getItem('userEmail');
+      if (!email) {
+        toast.error('Please login first');
+        return;
+      }
+
+      // Validate cart items
+      if (!cartItems || cartItems.length === 0) {
+        toast.error('Your cart is empty');
+        return;
+      }
+
+      // Validate address data
+      const requiredFields = ['fullName', 'addressLine1', 'city', 'state', 'zipCode', 'phone'];
+      const missingFields = requiredFields.filter(field => !addressData[field]);
+
+      if (missingFields.length > 0) {
+        toast.error(`Please fill in all required fields: ${missingFields.join(', ')}`);
+        return;
+      }
+
+      // Prepare order data
+      const orderData = {
+        email,
+        items: cartItems.map(item => {
+          console.log(`Preparing order item for product: ${item.product.name}, ID: ${item.product._id}`);
+          return {
+            product: item.product._id,
+            quantity: item.quantity
+          };
+        }),
+        shippingAddress: {
+          fullName: addressData.fullName,
+          addressLine1: addressData.addressLine1,
+          addressLine2: addressData.addressLine2 || '',
+          city: addressData.city,
+          state: addressData.state,
+          zipCode: addressData.zipCode,
+          phone: addressData.phone
+        },
+        totalAmount: total,
+        status: 'PENDING' // Use uppercase to match backend expectations
+      };
+
+      console.log('Sending order data:', JSON.stringify(orderData));
+
+      const response = await fetch('http://localhost:5000/api/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(orderData)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to place order');
+      }
+
+      const data = await response.json();
+
+      // Clear the cart in the frontend
+      setCartItems([]);
+      clearCart();
+
+      // Close the modal
+      setIsCheckoutModalOpen(false);
+
+      // Show success message
+      toast.success('Order placed successfully!');
+
+      // Redirect to profile page
+      navigate('/profile');
+    } catch (error) {
+      console.error('Error placing order:', error);
+      toast.error(error.message || 'Failed to place order');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Nav />
       <div className="pt-24 md:pt-32 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <h1 className="text-3xl font-bold text-gray-900 mb-8">Shopping Cart</h1>
-        
+
         <div className="flex flex-col lg:flex-row gap-8">
           <div className="lg:w-2/3">
             {loading ? (
@@ -149,14 +233,14 @@ const CartPage = () => {
                         <p className="text-sm text-gray-500">{item.product.brand}</p>
                       </div>
                     </div>
-                    
+
                     <div className="flex flex-wrap items-center gap-4 md:gap-6">
                       <p className="text-lg font-medium text-gray-900">
                         ${item.product.price?.toFixed(2)}
                       </p>
 
                       <div className="flex items-center border rounded-md">
-                        <button 
+                        <button
                           onClick={() => handleQuantityChange(item.product._id, (item.quantity || 1) - 1)}
                           className="px-3 py-1 text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
                           disabled={item.quantity <= 1}
@@ -166,19 +250,19 @@ const CartPage = () => {
                         <span className="px-4 py-1 border-x min-w-[40px] text-center">
                           {item.quantity || 1}
                         </span>
-                        <button 
+                        <button
                           onClick={() => handleQuantityChange(item.product._id, (item.quantity || 1) + 1)}
                           className="px-3 py-1 text-gray-600 hover:bg-gray-100"
                         >
                           +
                         </button>
                       </div>
-                      
+
                       <p className="text-lg font-semibold min-w-[80px] text-right">
                         ${((item.product.price || 0) * (item.quantity || 1)).toFixed(2)}
                       </p>
-                      
-                      <button 
+
+                      <button
                         onClick={() => handleRemoveItem(item.product._id)}
                         className="text-red-500 hover:text-red-700 ml-auto md:ml-0"
                         title="Remove item"
@@ -201,7 +285,7 @@ const CartPage = () => {
                     <span className="text-gray-600">Subtotal</span>
                     <span className="font-semibold">${subtotal.toFixed(2)}</span>
                   </div>
-                 
+
                   <div className="flex justify-between">
                     <span className="text-gray-600">Tax (5%)</span>
                     <span className="font-semibold">${tax.toFixed(2)}</span>
@@ -213,9 +297,10 @@ const CartPage = () => {
                     </div>
                   </div>
                 </div>
-                <button 
+                <button
                   className="w-full bg-blue-600 text-white py-3 rounded-md hover:bg-blue-700 transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                   disabled={cartItems.length === 0}
+                  onClick={() => setIsCheckoutModalOpen(true)}
                 >
                   Proceed to Checkout
                 </button>
@@ -224,6 +309,12 @@ const CartPage = () => {
           )}
         </div>
       </div>
+      <CheckoutModal
+        isOpen={isCheckoutModalOpen}
+        onClose={() => setIsCheckoutModalOpen(false)}
+        onSubmit={handleCheckout}
+        total={total}
+      />
     </div>
   );
 };

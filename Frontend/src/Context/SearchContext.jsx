@@ -64,7 +64,7 @@ export const SearchProvider = ({ children }) => {
     if (!query.trim()) return;
     const results = await fetchSearchResults(query);
     if (results) {
-      navigate(`/search?q=${encodeURIComponent(query.trim())}`);
+      // Navigation is now handled in the Nav component
       setSuggestions([]);
     }
   };

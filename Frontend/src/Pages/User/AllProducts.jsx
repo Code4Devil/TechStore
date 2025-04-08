@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import ProductCard from '../../Components/ProductCard';
 import Skeleton from '../../Components/Skeleton';
 import { toast } from 'react-toastify';
@@ -11,10 +12,19 @@ const AllProducts = () => {
   const [loading, setLoading] = useState(true);
   const { addToCart } = useCart();
   const { searchQuery, setSearchQuery } = useSearch();
+  const location = useLocation();
 
   useEffect(() => {
+    // Check if there's a search parameter in the URL
+    const searchParams = new URLSearchParams(location.search);
+    const searchTerm = searchParams.get('search');
+
+    if (searchTerm) {
+      setSearchQuery(searchTerm);
+    }
+
     fetchProducts();
-  }, []);
+  }, [location.search]);
 
   const fetchProducts = async () => {
     try {
@@ -34,8 +44,8 @@ const AllProducts = () => {
   const handleAddToCart = async (productId) => {
     const success = await addToCart(productId);
     if (success) {
-      const updatedProducts = products.map(product => 
-        product._id === productId 
+      const updatedProducts = products.map(product =>
+        product._id === productId
           ? { ...product, inCart: !product.inCart }
           : product
       );
