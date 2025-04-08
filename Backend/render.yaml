@@ -4,7 +4,6 @@ services:
     env: node
     buildCommand: npm install
     startCommand: node server.js
-    rootDir: .
     envVars:
       - key: MONGO_URI
         sync: false

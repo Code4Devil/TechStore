@@ -14,12 +14,23 @@ const app = express();
 
 // Middleware setup
 app.use(cors({
-  origin: ['http://localhost:5173', 'https://your-frontend-app-name.vercel.app'],
+  origin: process.env.ALLOWED_ORIGINS ? 
+    process.env.ALLOWED_ORIGINS.split(',') : 
+    ['http://localhost:5173', 'https://your-frontend-app-name.vercel.app'],
   credentials: true
 }));
 
 app.use(bodyParser.json());
 app.use(express.json());
+
+// Health check route
+app.get('/', (_, res) => {
+  res.json({
+    message: 'E-commerce API is running',
+    environment: process.env.NODE_ENV || 'development',
+    timestamp: new Date().toISOString()
+  });
+});
 
 // MongoDB connection
 mongoose.connect(process.env.MONGO_URI, {
@@ -44,7 +55,7 @@ app.use('/api/retailer/products', retailerProductRoutes);
 app.use('/api/retailer/orders', retailerOrderRoutes);
 
 // Error handling middleware
-app.use((err, req, res, next) => {
+app.use((err, _req, res, _next) => {
   console.error('Server Error:', err);
   res.status(500).json({ error: 'Internal Server Error' });
 });
