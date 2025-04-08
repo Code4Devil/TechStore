@@ -37,10 +37,10 @@ const App = () => {
     const { user, loading, checkAuthStatus } = useAuth();
 
     useEffect(() => {
-      if (!user && !loading) {
+      if (!user && !loading && checkAuthStatus) {
         checkAuthStatus();
       }
-    }, [user, loading]);
+    }, [user, loading, checkAuthStatus]);
 
     if (loading) {
       return (

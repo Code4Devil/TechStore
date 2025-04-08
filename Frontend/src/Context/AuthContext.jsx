@@ -87,14 +87,30 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
+    // First set loading to true to prevent any race conditions
+    setLoading(true);
+
+    // Clear local storage
     localStorage.removeItem('userEmail');
+
+    // Reset user state
     setUser(null);
+
+    // Show success message
     toast.success('Logged out successfully');
+
+    // Set loading to false
+    setLoading(false);
+
+    // Navigate to login page
     navigate('/');
   };
 
+  // Rename fetchProfile to checkAuthStatus for clarity and consistency
+  const checkAuthStatus = fetchProfile;
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, checkAuthStatus }}>
       {children}
     </AuthContext.Provider>
   );

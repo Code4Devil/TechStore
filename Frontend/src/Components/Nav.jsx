@@ -124,7 +124,7 @@ const Nav = () => {
               )}
             </Link>
 
-            <Link to="/profile" className="hidden md:block hover:text-blue-600">
+            <Link to="/profile" className="hover:text-blue-600">
               <i className="fa-regular fa-user text-xl"></i>
             </Link>
 

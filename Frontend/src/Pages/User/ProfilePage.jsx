@@ -135,22 +135,22 @@ const ProfilePage = () => {
       <Nav />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 pt-24">
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
                 <i className="fas fa-user text-2xl text-blue-600"></i>
               </div>
-              <div>
-                <h2 className="text-2xl font-bold">{user?.name}</h2>
-                <p className="text-gray-600">{user?.email}</p>
+              <div className="overflow-hidden">
+                <h2 className="text-xl md:text-2xl font-bold truncate">{user?.name}</h2>
+                <p className="text-gray-600 text-sm md:text-base truncate">{user?.email}</p>
               </div>
             </div>
             <button
               onClick={() => setShowLogoutConfirm(true)}
-              className="px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-lg transition-all duration-300 transform hover:scale-[1.02] shadow-md hover:shadow-lg flex items-center gap-2"
+              className="px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-lg transition-all duration-300 transform hover:scale-[1.02] shadow-md hover:shadow-lg flex items-center justify-center gap-2 w-full md:w-auto"
             >
               <i className="fas fa-sign-out-alt"></i>
-              Logout
+              <span>Logout</span>
             </button>
 
             {/* Logout Confirmation Modal */}
@@ -160,23 +160,23 @@ const ProfilePage = () => {
                 onClick={() => setShowLogoutConfirm(false)}
               >
                 <div
-                  className="bg-white rounded-lg p-6 max-w-sm mx-auto"
+                  className="bg-white rounded-lg p-4 sm:p-6 max-w-sm mx-4 sm:mx-auto w-full"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-xl font-bold">Confirm Logout</h3>
+                    <h3 className="text-lg sm:text-xl font-bold">Confirm Logout</h3>
                     <button
                       onClick={() => setShowLogoutConfirm(false)}
-                      className="text-gray-400 hover:text-gray-600 transition-colors"
+                      className="text-gray-400 hover:text-gray-600 transition-colors p-1"
                     >
                       <i className="fas fa-times text-lg"></i>
                     </button>
                   </div>
-                  <p className="text-gray-600 mb-6">Are you sure you want to log out of your account?</p>
-                  <div className="flex justify-end gap-3">
+                  <p className="text-gray-600 mb-4 sm:mb-6 text-sm sm:text-base">Are you sure you want to log out of your account?</p>
+                  <div className="flex flex-col sm:flex-row sm:justify-end gap-3">
                     <button
                       onClick={() => setShowLogoutConfirm(false)}
-                      className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg transition-all duration-300 transform hover:scale-[1.02] shadow-sm hover:shadow-md"
+                      className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg transition-all duration-300 transform hover:scale-[1.02] shadow-sm hover:shadow-md order-2 sm:order-1 w-full sm:w-auto"
                     >
                       Cancel
                     </button>
@@ -185,7 +185,7 @@ const ProfilePage = () => {
                         setShowLogoutConfirm(false);
                         logout();
                       }}
-                      className="px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-lg transition-all duration-300 transform hover:scale-[1.02] shadow-md hover:shadow-lg"
+                      className="px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-lg transition-all duration-300 transform hover:scale-[1.02] shadow-md hover:shadow-lg order-1 sm:order-2 w-full sm:w-auto"
                     >
                       Logout
                     </button>
