@@ -19,12 +19,22 @@ const ProductPage = () => {
   const isInCart = cartItems?.some(item => item.product._id === product?._id);
 
   useEffect(() => {
+    console.log('ProductPage useEffect - id:', id);
+
     const fetchProduct = async () => {
       try {
         setLoading(true);
+        console.log('Fetching product with ID:', id);
+        console.log('API URL:', `${config.API_URL}/api/products/${id}`);
+
         const response = await fetch(`${config.API_URL}/api/products/${id}`);
-        if (!response.ok) throw new Error('Product not found');
+        if (!response.ok) {
+          console.error('Product fetch failed with status:', response.status);
+          throw new Error('Product not found');
+        }
+
         const data = await response.json();
+        console.log('Product data received:', data);
         setProduct(data);
       } catch (error) {
         console.error('Error fetching product:', error);
@@ -35,12 +45,15 @@ const ProductPage = () => {
       }
     };
 
-    if (!product || product._id !== id) {
+    // Always fetch the product when the ID changes
+    if (id) {
       fetchProduct();
     } else {
+      console.error('No product ID provided');
       setLoading(false);
+      navigate('/products');
     }
-  }, [id, setProduct, navigate, product]);
+  }, [id, setProduct, navigate]);
 
   if (loading) {
     return (
@@ -73,17 +86,17 @@ const ProductPage = () => {
   return (
     <div>
       <Nav />
-      <section id="productShowcase" className="bg-white pt-24 md:pt-32">
+      <section id="productShowcase" className="bg-white pt-24 md:pt-32 md:mt-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="flex flex-col md:flex-row gap-8">
             {/* Product Images Gallery */}
             <div className="md:w-1/2">
               <div className="product-gallery sticky top-24">
-                <div className="main-image bg-neutral-100 rounded-lg p-6 mb-4">
+                <div className="main-image bg-neutral-100 rounded-lg p-10 mb-4">
                   <div className="aspect-w-1 aspect-h-1">
                     <div className="w-full h-full flex items-center justify-center">
                       {product.image?.startsWith('fas') ? (
-                        <i className={`${product.image} text-6xl text-gray-400`}></i>
+                        <i className={`${product.image} text-6xl text-gray-400 p-20`}></i>
                       ) : product.image ? (
                         <img
                           src={product.image}
@@ -103,7 +116,7 @@ const ProductPage = () => {
                         />
                       ) : (
                         // No image provided, use category icon
-                        <i className={`${getProductIconByType(product.type)} text-6xl ${getIconColorByType(product.type)}`}></i>
+                        <i className={`${getProductIconByType(product.type)} text-6xl  ${getIconColorByType(product.type)}`}></i>
                       )}
                     </div>
                   </div>

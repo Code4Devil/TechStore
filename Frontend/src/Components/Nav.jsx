@@ -11,11 +11,16 @@ const Nav = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const searchRef = useRef(null);
+  const desktopSearchRef = useRef(null);
+  const mobileSearchRef = useRef(null);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (searchRef.current && !searchRef.current.contains(event.target)) {
+      // Check if click is outside both desktop and mobile search containers
+      const isOutsideDesktopSearch = desktopSearchRef.current && !desktopSearchRef.current.contains(event.target);
+      const isOutsideMobileSearch = mobileSearchRef.current && !mobileSearchRef.current.contains(event.target);
+
+      if (isOutsideDesktopSearch && isOutsideMobileSearch) {
         setShowSuggestions(false);
       }
     };
@@ -41,10 +46,26 @@ const Nav = () => {
   };
 
   const handleSuggestionClick = (suggestion) => {
+    console.log('handleSuggestionClick called with:', suggestion);
     setSearchQuery(suggestion.name);
-    handleSearch(suggestion.name);
     setShowSuggestions(false);
-    navigate(`/search?q=${encodeURIComponent(suggestion.name)}`);
+    setIsMobileSearchOpen(false); // Close mobile search if open
+
+    // Navigate directly to the product page if we have the product ID
+    if (suggestion._id) {
+      console.log('Navigating to product page:', `/product/${suggestion._id}`);
+      // Use setTimeout to ensure state updates complete before navigation
+      setTimeout(() => {
+        navigate(`/product/${suggestion._id}`);
+      }, 10);
+    } else {
+      // Fall back to search results if no ID is available
+      console.log('Navigating to search results:', `/search?q=${encodeURIComponent(suggestion.name)}`);
+      handleSearch(suggestion.name);
+      setTimeout(() => {
+        navigate(`/search?q=${encodeURIComponent(suggestion.name)}`);
+      }, 10);
+    }
   };
 
   return (
@@ -75,7 +96,7 @@ const Nav = () => {
           </Link>
 
           {/* Desktop Search */}
-          <div className="hidden md:block flex-1 max-w-xl mx-8" ref={searchRef}>
+          <div className="hidden md:block flex-1 max-w-xl mx-8" ref={desktopSearchRef}>
             <div className="relative">
               <form onSubmit={handleSubmit} className="relative">
                 <input
@@ -85,6 +106,7 @@ const Nav = () => {
                   onFocus={() => setShowSuggestions(true)}
                   placeholder="Search products..."
                   className="w-full pl-4 pr-10 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+                  autoComplete="off"
                 />
                 <button
                   type="submit"
@@ -97,6 +119,7 @@ const Nav = () => {
               <div className="relative">
                 <SearchSuggestions
                   showSuggestions={showSuggestions}
+                  setShowSuggestions={setShowSuggestions}
                   searchQuery={searchQuery}
                   suggestions={suggestions}
                   isLoading={isLoading}
@@ -150,7 +173,7 @@ const Nav = () => {
 
         {/* Mobile Search */}
         <div className={`${isMobileSearchOpen ? 'block' : 'hidden'} md:hidden border-t py-4`}>
-          <div className="relative" ref={searchRef}>
+          <div className="relative mobile-search-container" ref={mobileSearchRef}>
             <form onSubmit={handleSubmit} className="relative">
               <input
                 type="text"
@@ -159,6 +182,7 @@ const Nav = () => {
                 onFocus={() => setShowSuggestions(true)}
                 placeholder="Search products..."
                 className="w-full pl-4 pr-10 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+                autoComplete="off"
               />
               <button
                 type="submit"
@@ -172,6 +196,7 @@ const Nav = () => {
             <div className="relative">
               <SearchSuggestions
                 showSuggestions={showSuggestions}
+                setShowSuggestions={setShowSuggestions}
                 searchQuery={searchQuery}
                 suggestions={suggestions}
                 isLoading={isLoading}
