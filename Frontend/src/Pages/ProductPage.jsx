@@ -5,6 +5,7 @@ import { useCart } from '../Context/Cart';
 import Nav from '../Components/Nav';
 import { toast } from 'react-toastify';
 import { getProductIconByType, getIconColorByType } from '../utils/productIcons';
+import config from '../config';
 
 const ProductPage = () => {
   const { id } = useParams();
@@ -21,7 +22,7 @@ const ProductPage = () => {
     const fetchProduct = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`http://localhost:5000/api/products/${id}`);
+        const response = await fetch(`${config.API_URL}/api/products/${id}`);
         if (!response.ok) throw new Error('Product not found');
         const data = await response.json();
         setProduct(data);

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import config from '../config';
 
 const SearchContext = createContext();
 
@@ -18,7 +19,7 @@ export const SearchProvider = ({ children }) => {
 
     try {
       setIsLoading(true);
-      const response = await fetch(`http://localhost:5000/api/products/suggestions?q=${encodeURIComponent(query.trim())}`);
+      const response = await fetch(`${config.API_URL}/api/products/suggestions?q=${encodeURIComponent(query.trim())}`);
       if (!response.ok) throw new Error('Failed to fetch suggestions');
       const data = await response.json();
       setSuggestions(data);
@@ -35,7 +36,7 @@ export const SearchProvider = ({ children }) => {
 
     try {
       setIsLoading(true);
-      const response = await fetch(`http://localhost:5000/api/products/search?q=${encodeURIComponent(query.trim())}`);
+      const response = await fetch(`${config.API_URL}/api/products/search?q=${encodeURIComponent(query.trim())}`);
       if (!response.ok) throw new Error('Failed to fetch search results');
       const data = await response.json();
       setSearchResults(data);
