@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useRetailer } from '../Context/RetailerContext';
+import config from '../config';
 
 const RetailerNav = () => {
-  const { retailer, logout, token } = useRetailer();
+  const { retailer, logout, token, loading } = useRetailer();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [newOrdersCount, setNewOrdersCount] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const location = useLocation();
 
   useEffect(() => {
@@ -17,7 +19,7 @@ const RetailerNav = () => {
 
   const fetchNewOrdersCount = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/retailer/orders', {
+      const response = await fetch(`${config.API_URL}/api/retailer/orders`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -97,11 +99,12 @@ const RetailerNav = () => {
               <div>
                 <button
                   type="button"
-                  className="bg-white rounded-full flex text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  className={`bg-white rounded-full flex text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${isSubmitting || loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                   id="user-menu"
                   aria-expanded="false"
                   aria-haspopup="true"
-                  onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
+                  onClick={() => !isSubmitting && !loading && setIsProfileMenuOpen(!isProfileMenuOpen)}
+                  disabled={isSubmitting || loading}
                 >
                   <span className="sr-only">Open user menu</span>
                   <div className="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center">
@@ -133,11 +136,14 @@ const RetailerNav = () => {
                   </Link>
                   <button
                     onClick={() => {
+                      if (isSubmitting || loading) return;
+                      setIsSubmitting(true);
                       setIsProfileMenuOpen(false);
                       logout();
                     }}
-                    className="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    className={`w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 ${isSubmitting || loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                     role="menuitem"
+                    disabled={isSubmitting || loading}
                   >
                     Sign out
                   </button>
@@ -148,9 +154,10 @@ const RetailerNav = () => {
           <div className="-mr-2 flex items-center sm:hidden">
             <button
               type="button"
-              className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
+              className={`inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 ${isSubmitting || loading ? 'opacity-50 cursor-not-allowed' : ''}`}
               aria-expanded="false"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              onClick={() => !isSubmitting && !loading && setIsMenuOpen(!isMenuOpen)}
+              disabled={isSubmitting || loading}
             >
               <span className="sr-only">Open main menu</span>
               <svg
@@ -249,10 +256,13 @@ const RetailerNav = () => {
             </Link>
             <button
               onClick={() => {
+                if (isSubmitting || loading) return;
+                setIsSubmitting(true);
                 setIsMenuOpen(false);
                 logout();
               }}
-              className="w-full text-left block px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100"
+              className={`w-full text-left block px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100 ${isSubmitting || loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+              disabled={isSubmitting || loading}
             >
               Sign out
             </button>

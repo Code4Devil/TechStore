@@ -14,6 +14,17 @@ const UserSignup = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formTouched, setFormTouched] = useState({
+    name: false,
+    email: false,
+    address: false,
+    city: false,
+    state: false,
+    zipCode: false,
+    password: false,
+    confirmPassword: false
+  });
 
   // Validation functions
   const validateEmail = (email) => {
@@ -24,8 +35,21 @@ const UserSignup = () => {
   // Phone validation removed
 
   const validateZipCode = (zipCode) => {
-    const re = /^[0-9]{5}(-[0-9]{4})?$/;
+    // Support Indian PIN codes (6 digits) and US ZIP codes (5 digits with optional 4-digit extension)
+    const re = /^[0-9]{6}$|^[0-9]{5}(-[0-9]{4})?$/;
     return re.test(zipCode);
+  };
+
+  const validateAddress = (address) => {
+    return address.trim().length > 0;
+  };
+
+  const validateCity = (city) => {
+    return city.trim().length > 0;
+  };
+
+  const validateState = (state) => {
+    return state.trim().length > 0;
   };
 
   const validatePassword = (password) => {
@@ -34,34 +58,108 @@ const UserSignup = () => {
     return re.test(password);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  // Validate form field when it loses focus
+  const handleBlur = (field) => {
+    setFormTouched(prev => ({ ...prev, [field]: true }));
+    validateField(field);
+  };
 
-    // Reset errors
+  // Validate a specific field
+  const validateField = (field) => {
+    const newErrors = { ...errors };
+
+    switch (field) {
+      case 'name':
+        if (!name) newErrors.name = 'Name is required';
+        else delete newErrors.name;
+        break;
+      case 'email':
+        if (!validateEmail(email)) newErrors.email = 'Valid email is required';
+        else delete newErrors.email;
+        break;
+      case 'address':
+        if (!validateAddress(address)) newErrors.address = 'Address is required';
+        else delete newErrors.address;
+        break;
+      case 'city':
+        if (!validateCity(city)) newErrors.city = 'City is required';
+        else delete newErrors.city;
+        break;
+      case 'state':
+        if (!validateState(state)) newErrors.state = 'State is required';
+        else delete newErrors.state;
+        break;
+      case 'zipCode':
+        if (!validateZipCode(zipCode)) newErrors.zipCode = 'Valid ZIP code is required';
+        else delete newErrors.zipCode;
+        break;
+      case 'password':
+        if (!validatePassword(password)) {
+          newErrors.password = 'Password must be at least 8 characters with 1 uppercase, 1 lowercase, and 1 number';
+        } else {
+          delete newErrors.password;
+        }
+        // Also validate confirm password if it's been touched
+        if (formTouched.confirmPassword && password !== confirmPassword) {
+          newErrors.confirmPassword = 'Passwords do not match';
+        } else if (formTouched.confirmPassword) {
+          delete newErrors.confirmPassword;
+        }
+        break;
+      case 'confirmPassword':
+        if (password !== confirmPassword) {
+          newErrors.confirmPassword = 'Passwords do not match';
+        } else {
+          delete newErrors.confirmPassword;
+        }
+        break;
+      default:
+        break;
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  // Validate all fields
+  const validateForm = () => {
     const newErrors = {};
 
-    // Validate fields
     if (!name) newErrors.name = 'Name is required';
-
     if (!validateEmail(email)) newErrors.email = 'Valid email is required';
-
+    if (!validateAddress(address)) newErrors.address = 'Address is required';
+    if (!validateCity(city)) newErrors.city = 'City is required';
+    if (!validateState(state)) newErrors.state = 'State is required';
     if (!validateZipCode(zipCode)) newErrors.zipCode = 'Valid ZIP code is required';
-
+    if (!validatePassword(password)) {
+      newErrors.password = 'Password must be at least 8 characters with 1 uppercase, 1 lowercase, and 1 number';
+    }
     if (password !== confirmPassword) {
       newErrors.confirmPassword = 'Passwords do not match';
     }
 
-    if (!validatePassword(password)) {
-      newErrors.password = 'Password must be at least 8 characters with 1 uppercase, 1 lowercase, and 1 number';
-    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
-    // If there are errors, show them and stop
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // Prevent multiple submissions
+    if (isSubmitting) return;
+
+    // Mark all fields as touched
+    const allTouched = {};
+    Object.keys(formTouched).forEach(key => { allTouched[key] = true });
+    setFormTouched(allTouched);
+
+    // Validate all fields
+    if (!validateForm()) {
       return;
     }
 
     try {
+      setIsSubmitting(true);
       // Register with email
       await register(name, email, password, { address, city, state, zipCode });
 
@@ -69,6 +167,8 @@ const UserSignup = () => {
     } catch (error) {
       console.error('Registration error:', error);
       toast.error(error.message || 'Registration failed');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -92,9 +192,13 @@ const UserSignup = () => {
                   <input
                     type="text"
                     id="name"
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                    className={`w-full px-4 py-3 rounded-lg border ${errors.name && formTouched.name ? 'border-red-500' : 'border-gray-300'} focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all`}
                     value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    onChange={(e) => {
+                      setName(e.target.value);
+                      if (formTouched.name) validateField('name');
+                    }}
+                    onBlur={() => handleBlur('name')}
                     required
                   />
                   {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
@@ -108,9 +212,13 @@ const UserSignup = () => {
                   <input
                     type="email"
                     id="email"
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                    className={`w-full px-4 py-3 rounded-lg border ${errors.email && formTouched.email ? 'border-red-500' : 'border-gray-300'} focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all`}
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      if (formTouched.email) validateField('email');
+                    }}
+                    onBlur={() => handleBlur('email')}
                     required
                   />
                   {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
@@ -122,11 +230,16 @@ const UserSignup = () => {
                   <input
                     type="text"
                     id="address"
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                    className={`w-full px-4 py-3 rounded-lg border ${errors.address && formTouched.address ? 'border-red-500' : 'border-gray-300'} focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all`}
                     value={address}
-                    onChange={(e) => setAddress(e.target.value)}
+                    onChange={(e) => {
+                      setAddress(e.target.value);
+                      if (formTouched.address) validateField('address');
+                    }}
+                    onBlur={() => handleBlur('address')}
                     required
                   />
+                  {errors.address && formTouched.address && <p className="text-red-500 text-xs mt-1">{errors.address}</p>}
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -135,22 +248,32 @@ const UserSignup = () => {
                     <input
                       type="text"
                       id="city"
-                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                      className={`w-full px-4 py-3 rounded-lg border ${errors.city && formTouched.city ? 'border-red-500' : 'border-gray-300'} focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all`}
                       value={city}
-                      onChange={(e) => setCity(e.target.value)}
+                      onChange={(e) => {
+                        setCity(e.target.value);
+                        if (formTouched.city) validateField('city');
+                      }}
+                      onBlur={() => handleBlur('city')}
                       required
                     />
+                    {errors.city && formTouched.city && <p className="text-red-500 text-xs mt-1">{errors.city}</p>}
                   </div>
                   <div>
                     <label className="block text-gray-700 text-sm font-medium mb-2" htmlFor="state">State</label>
                     <input
                       type="text"
                       id="state"
-                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                      className={`w-full px-4 py-3 rounded-lg border ${errors.state && formTouched.state ? 'border-red-500' : 'border-gray-300'} focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all`}
                       value={state}
-                      onChange={(e) => setState(e.target.value)}
+                      onChange={(e) => {
+                        setState(e.target.value);
+                        if (formTouched.state) validateField('state');
+                      }}
+                      onBlur={() => handleBlur('state')}
                       required
                     />
+                    {errors.state && formTouched.state && <p className="text-red-500 text-xs mt-1">{errors.state}</p>}
                   </div>
                 </div>
 
@@ -159,10 +282,14 @@ const UserSignup = () => {
                   <input
                     type="text"
                     id="zipCode"
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                    className={`w-full px-4 py-3 rounded-lg border ${errors.zipCode && formTouched.zipCode ? 'border-red-500' : 'border-gray-300'} focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all`}
                     value={zipCode}
-                    onChange={(e) => setZipCode(e.target.value)}
-                    placeholder="12345"
+                    onChange={(e) => {
+                      setZipCode(e.target.value);
+                      if (formTouched.zipCode) validateField('zipCode');
+                    }}
+                    onBlur={() => handleBlur('zipCode')}
+                    placeholder="140413"
                     required
                   />
                   {errors.zipCode && <p className="text-red-500 text-xs mt-1">{errors.zipCode}</p>}
@@ -174,9 +301,14 @@ const UserSignup = () => {
                   <input
                     type="password"
                     id="password"
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                    className={`w-full px-4 py-3 rounded-lg border ${errors.password && formTouched.password ? 'border-red-500' : 'border-gray-300'} focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all`}
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      if (formTouched.password) validateField('password');
+                      if (formTouched.confirmPassword && confirmPassword) validateField('confirmPassword');
+                    }}
+                    onBlur={() => handleBlur('password')}
                     required
                   />
                   {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
@@ -187,9 +319,13 @@ const UserSignup = () => {
                   <input
                     type="password"
                     id="confirm-password"
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                    className={`w-full px-4 py-3 rounded-lg border ${errors.confirmPassword && formTouched.confirmPassword ? 'border-red-500' : 'border-gray-300'} focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all`}
                     value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    onChange={(e) => {
+                      setConfirmPassword(e.target.value);
+                      if (formTouched.confirmPassword) validateField('confirmPassword');
+                    }}
+                    onBlur={() => handleBlur('confirmPassword')}
                     required
                   />
                   {errors.confirmPassword && <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>}
@@ -207,9 +343,10 @@ const UserSignup = () => {
 
                 <button
                   type="submit"
-                  className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white py-3 px-4 rounded-lg transition-all duration-300 transform hover:scale-[1.02] shadow-md hover:shadow-lg font-medium"
+                  disabled={isSubmitting || Object.keys(errors).length > 0}
+                  className={`w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white py-3 px-4 rounded-lg transition-all duration-300 transform hover:scale-[1.02] shadow-md hover:shadow-lg font-medium ${(isSubmitting || Object.keys(errors).length > 0) ? 'opacity-70 cursor-not-allowed' : ''}`}
                 >
-                  Create Account
+                  {isSubmitting ? 'Creating Account...' : 'Create Account'}
                 </button>
 
                 <div className="text-center mt-4">

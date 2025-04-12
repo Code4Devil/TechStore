@@ -1,6 +1,7 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import config from '../config';
 
 const RetailerContext = createContext();
 
@@ -23,7 +24,7 @@ export const RetailerProvider = ({ children }) => {
     }
 
     try {
-      const response = await fetch('http://localhost:5000/api/retailer/profile', {
+      const response = await fetch(`${config.API_URL}/api/retailer/profile`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -47,7 +48,7 @@ export const RetailerProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const response = await fetch('http://localhost:5000/api/retailer/login', {
+      const response = await fetch(`${config.API_URL}/api/retailer/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -74,7 +75,7 @@ export const RetailerProvider = ({ children }) => {
 
   const register = async (retailerData) => {
     try {
-      const response = await fetch('http://localhost:5000/api/retailer/register', {
+      const response = await fetch(`${config.API_URL}/api/retailer/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -100,16 +101,31 @@ export const RetailerProvider = ({ children }) => {
   };
 
   const logout = () => {
+    // Set loading to true to prevent any race conditions
+    setLoading(true);
+
+    // Clear local storage
     localStorage.removeItem('retailerToken');
+
+    // Reset state
     setToken(null);
     setRetailer(null);
+
+    // Show success message
     toast.success('Logged out successfully');
+
+    // Navigate to login page
     navigate('/retailer/login');
+
+    // Set loading back to false after a short delay to ensure navigation completes
+    setTimeout(() => {
+      setLoading(false);
+    }, 100);
   };
 
   const updateProfile = async (profileData) => {
     try {
-      const response = await fetch('http://localhost:5000/api/retailer/profile', {
+      const response = await fetch(`${config.API_URL}/api/retailer/profile`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

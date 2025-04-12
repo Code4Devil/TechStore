@@ -26,6 +26,7 @@ import ProfilePage from './Pages/User/ProfilePage';
 import RetailerLogin from './Pages/Retailer/RetailerLogin';
 import RetailerRegister from './Pages/Retailer/RetailerRegister';
 import RetailerDashboard from './Pages/Retailer/RetailerDashboard';
+import RetailerProfile from './Pages/Retailer/RetailerProfile';
 import ProductList from './Pages/Retailer/ProductList';
 import ProductForm from './Pages/Retailer/ProductForm';
 import OrderList from './Pages/Retailer/OrderList';
@@ -102,6 +103,7 @@ const App = () => {
                   <Route path="/retailer/login" element={<RetailerLogin />} />
                   <Route path="/retailer/register" element={<RetailerRegister />} />
                   <Route path="/retailer/dashboard" element={<RetailerProtectedRoute><RetailerDashboard /></RetailerProtectedRoute>} />
+                  <Route path="/retailer/profile" element={<RetailerProtectedRoute><RetailerProfile /></RetailerProtectedRoute>} />
                   <Route path="/retailer/products" element={<RetailerProtectedRoute><ProductList /></RetailerProtectedRoute>} />
                   <Route path="/retailer/products/new" element={<RetailerProtectedRoute><ProductForm /></RetailerProtectedRoute>} />
                   <Route path="/retailer/products/:productId" element={<RetailerProtectedRoute><ProductForm /></RetailerProtectedRoute>} />

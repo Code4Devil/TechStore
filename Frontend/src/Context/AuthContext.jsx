@@ -63,14 +63,26 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const register = async (name, email, password) => {
+  const register = async (name, email, password, addressInfo = {}) => {
     try {
+      const { address, city, state, zipCode } = addressInfo;
+
+      const userData = {
+        name,
+        email,
+        password,
+        address: address || '',
+        city: city || '',
+        state: state || '',
+        zipCode: zipCode || ''
+      };
+
       const response = await fetch(`${config.API_URL}/api/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ name, email, password })
+        body: JSON.stringify(userData)
       });
 
       if (!response.ok) {
@@ -83,6 +95,7 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       console.error('Error registering:', error);
       toast.error(error.message);
+      throw error; // Re-throw to allow the calling component to handle it
     }
   };
 

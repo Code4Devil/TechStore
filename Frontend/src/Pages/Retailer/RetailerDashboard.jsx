@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useRetailer } from '../../Context/RetailerContext';
 import RetailerNav from '../../Components/RetailerNav';
+import config from '../../config';
 
 const RetailerDashboard = () => {
   const { retailer, token } = useRetailer();
@@ -27,7 +28,7 @@ const RetailerDashboard = () => {
       setLoading(true);
 
       // Fetch products
-      const productsResponse = await fetch('http://localhost:5000/api/retailer/products', {
+      const productsResponse = await fetch(`${config.API_URL}/api/retailer/products`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -40,7 +41,7 @@ const RetailerDashboard = () => {
       const products = await productsResponse.json();
 
       // Fetch orders
-      const ordersResponse = await fetch('http://localhost:5000/api/retailer/orders', {
+      const ordersResponse = await fetch(`${config.API_URL}/api/retailer/orders`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
