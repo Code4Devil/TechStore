@@ -41,7 +41,7 @@ This guide explains how to deploy the e-commerce application with the frontend o
      - `PORT`: 10000 (or any port Render assigns)
 
 3. **Configure CORS**
-   - After deployment, update the CORS settings in `server.js` with your actual Vercel frontend URL
+   - After deployment, update the CORS settings in `server-test.js` with your actual Vercel frontend URL
 
 ## Post-Deployment Steps
 

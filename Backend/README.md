@@ -19,7 +19,7 @@ This is the backend API for the e-commerce application.
    - Name: ecommerce-backend
    - Environment: Node
    - Build Command: `npm install`
-   - Start Command: `node server.js`
+   - Start Command: `node server-test.js`
    - Root Directory: `.` (or leave blank)
 
 6. Add environment variables:
