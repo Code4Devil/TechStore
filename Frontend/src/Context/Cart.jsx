@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
+import config from '../config';
 
 const CartContext = createContext();
 
@@ -20,9 +21,9 @@ export const CartProvider = ({ children }) => {
         return;
       }
 
-      const response = await fetch(`http://localhost:5000/api/auth/profile?email=${email}`);
+      const response = await fetch(`${config.API_URL}/api/auth/profile?email=${email}`);
       if (!response.ok) throw new Error('Failed to fetch cart');
-      
+
       const data = await response.json();
       if (data && data.cart) {
         setCartItems(data.cart);
@@ -44,7 +45,7 @@ export const CartProvider = ({ children }) => {
         return false;
       }
 
-      const response = await fetch(`http://localhost:5000/api/auth/cart/${productId}`, {
+      const response = await fetch(`${config.API_URL}/api/auth/cart/${productId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
@@ -73,7 +74,7 @@ export const CartProvider = ({ children }) => {
         return false;
       }
 
-      const response = await fetch(`http://localhost:5000/api/auth/cart/${productId}`, {
+      const response = await fetch(`${config.API_URL}/api/auth/cart/${productId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json'
@@ -106,7 +107,7 @@ export const CartProvider = ({ children }) => {
         return removeFromCart(productId);
       }
 
-      const response = await fetch(`http://localhost:5000/api/auth/cart/${productId}`, {
+      const response = await fetch(`${config.API_URL}/api/auth/cart/${productId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
@@ -132,7 +133,7 @@ export const CartProvider = ({ children }) => {
       const email = localStorage.getItem('userEmail');
       if (!email) return;
 
-      const response = await fetch('http://localhost:5000/api/auth/cart/clear', {
+      const response = await fetch(`${config.API_URL}/api/auth/cart/clear`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json'

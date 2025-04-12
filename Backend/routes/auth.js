@@ -33,8 +33,11 @@ router.post('/register', async (req, res) => {
 });
 
 // Login route
-// Login route
 router.post('/login', async (req, res) => {
+  console.log('Login request received');
+  console.log('Request headers:', req.headers);
+  console.log('Request body:', req.body);
+
   const { email, password } = req.body;
   try {
     // Find user and populate cart and wishlist
@@ -42,13 +45,22 @@ router.post('/login', async (req, res) => {
       .populate('cart.product')
       .populate('wishlist');
 
-    if (!user || !(await user.matchPassword(password))) {
+    if (!user) {
+      console.log('User not found:', email);
+      return res.status(401).json({ error: 'Invalid email or password' });
+    }
+
+    const isMatch = await user.matchPassword(password);
+    console.log('Password match result:', isMatch);
+
+    if (!isMatch) {
       return res.status(401).json({ error: 'Invalid email or password' });
     }
 
     // Return user without password
     const userResponse = user.toObject();
     delete userResponse.password;
+    console.log('Login successful for user:', email);
     res.json({ user: userResponse, email: userResponse.email });
   } catch (error) {
     console.error('Error during login:', error);
@@ -66,7 +78,7 @@ router.get('/profile', async (req, res) => {
     const user = await User.findOne({ email })
       .populate('cart.product')
       .select('-password'); // Exclude password
-    
+
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
@@ -130,7 +142,7 @@ router.put('/cart/:productId', async (req, res) => {
 
     await user.save();
     await user.populate('cart.product');
-    
+
     console.log('Updated cart:', user.cart); // Debug log
     res.json(user.cart);
   } catch (error) {
@@ -171,7 +183,7 @@ router.get('/orders', async (req, res) => {
     const user = await User.findOne({ email })
       .populate('orders.items.product')
       .select('orders');
-    
+
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }

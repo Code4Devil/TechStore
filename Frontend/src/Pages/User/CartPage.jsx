@@ -4,6 +4,7 @@ import { toast } from 'react-toastify';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../../Context/Cart';
 import CheckoutModal from '../../Components/CheckoutModal';
+import config from '../../config';
 
 const CartPage = () => {
   const [cartItems, setCartItems] = useState([]);
@@ -25,7 +26,7 @@ const CartPage = () => {
         return;
       }
 
-      const response = await fetch(`http://localhost:5000/api/auth/profile?email=${email}`);
+      const response = await fetch(`${config.API_URL}/api/auth/profile?email=${email}`);
       if (!response.ok) throw new Error('Failed to fetch cart items');
 
       const data = await response.json();
@@ -52,7 +53,7 @@ const CartPage = () => {
         return;
       }
 
-      const response = await fetch(`http://localhost:5000/api/auth/cart/${productId}`, {
+      const response = await fetch(`${config.API_URL}/api/auth/cart/${productId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
@@ -82,7 +83,7 @@ const CartPage = () => {
         return;
       }
 
-      const response = await fetch(`http://localhost:5000/api/auth/cart/${productId}`, {
+      const response = await fetch(`${config.API_URL}/api/auth/cart/${productId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json'
@@ -173,7 +174,7 @@ const CartPage = () => {
 
       console.log('Sending order data:', JSON.stringify(orderData));
 
-      const response = await fetch('http://localhost:5000/api/orders', {
+      const response = await fetch(`${config.API_URL}/api/orders`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
