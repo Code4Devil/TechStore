@@ -4,6 +4,7 @@ import { useRetailer } from '../../Context/RetailerContext';
 import RetailerNav from '../../Components/RetailerNav';
 import { toast } from 'react-toastify';
 import { getProductIconByType, getIconColorByType } from '../../utils/productIcons';
+import config from '../../config';
 
 const ProductList = () => {
   const { token } = useRetailer();
@@ -21,7 +22,7 @@ const ProductList = () => {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:5000/api/retailer/products', {
+      const response = await fetch(`${config.API_URL}/api/retailer/products`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -43,7 +44,7 @@ const ProductList = () => {
 
   const handleToggleActive = async (productId, currentStatus) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/retailer/products/${productId}`, {
+      const response = await fetch(`${config.API_URL}/api/retailer/products/${productId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

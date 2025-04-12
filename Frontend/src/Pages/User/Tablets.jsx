@@ -3,6 +3,7 @@ import Nav from '../../Components/Nav';
 import Skeleton from '../../Components/Skeleton';
 import { toast } from 'react-toastify';
 import ProductCard from '../../Components/ProductCard';
+import config from '../../config';
 
 const Tablets = () => {
   const [tablets, setTablets] = useState([]);
@@ -19,7 +20,7 @@ const Tablets = () => {
   const fetchTablets = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:5000/api/products');
+      const response = await fetch(`${config.API_URL}/api/products`);
       if (!response.ok) throw new Error('Failed to fetch tablets');
       const data = await response.json();
       const tabletProducts = data.filter(product => product.type === 'tablet');
@@ -34,24 +35,24 @@ const Tablets = () => {
 
   const handleLike = async (tabletId) => {
     try {
-      const response = await fetch(`http://localhost:5000/products/${tabletId}/like`, {
+      const response = await fetch(`${config.API_URL}/api/products/${tabletId}/like`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
       });
-      
+
       if (!response.ok) throw new Error('Failed to update wishlist');
 
-      const updatedTablets = tablets.map(tablet => 
-        tablet._id === tabletId 
+      const updatedTablets = tablets.map(tablet =>
+        tablet._id === tabletId
           ? { ...tablet, liked: !tablet.liked }
           : tablet
       );
       setTablets(updatedTablets);
       const currentTablet = updatedTablets.find(t => t._id === tabletId);
       toast.success(currentTablet.liked ? 'Added to wishlist' : 'Removed from wishlist');
-      
+
       const navUpdateEvent = new CustomEvent('wishlistUpdated');
       window.dispatchEvent(navUpdateEvent);
     } catch (error) {
@@ -63,24 +64,24 @@ const Tablets = () => {
   const handleAddToCart = async (tabletId) => {
     setAddingToCart(tabletId);
     try {
-      const response = await fetch(`http://localhost:5000/products/${tabletId}/cart`, {
+      const response = await fetch(`${config.API_URL}/api/products/${tabletId}/cart`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
       });
-      
+
       if (!response.ok) throw new Error('Failed to update cart');
 
-      const updatedTablets = tablets.map(tablet => 
-        tablet._id === tabletId 
+      const updatedTablets = tablets.map(tablet =>
+        tablet._id === tabletId
           ? { ...tablet, inCart: !tablet.inCart }
           : tablet
       );
       setTablets(updatedTablets);
       const currentTablet = updatedTablets.find(t => t._id === tabletId);
       toast.success(currentTablet.inCart ? 'Added to cart' : 'Removed from cart');
-      
+
       const navUpdateEvent = new CustomEvent('cartUpdated');
       window.dispatchEvent(navUpdateEvent);
     } catch (error) {
@@ -113,8 +114,8 @@ const Tablets = () => {
         <div className="flex flex-wrap gap-4 mb-8">
           <div className="flex items-center gap-2">
             <label className="text-gray-700">Sort by:</label>
-            <select 
-              value={sortBy} 
+            <select
+              value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
               className="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               disabled={loading}

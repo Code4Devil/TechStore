@@ -3,6 +3,7 @@ import Nav from '../../Components/Nav';
 import Skeleton from '../../Components/Skeleton';
 import { toast } from 'react-toastify';
 import ProductCard from '../../Components/ProductCard';
+import config from '../../config';
 
 const Laptops = () => {
   const [laptops, setLaptops] = useState([]);
@@ -18,7 +19,7 @@ const Laptops = () => {
   const fetchLaptops = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:5000/api/products');
+      const response = await fetch(`${config.API_URL}/api/products`);
       const data = await response.json();
       const laptopProducts = data.filter(product => product.type === 'laptop');
       setLaptops(laptopProducts);
@@ -32,16 +33,16 @@ const Laptops = () => {
 
   const handleLike = async (laptopId) => {
     try {
-      const response = await fetch(`http://localhost:5000/products/${laptopId}/like`, {
+      const response = await fetch(`${config.API_URL}/api/products/${laptopId}/like`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
       });
-      
+
       if (response.ok) {
-        const updatedLaptops = laptops.map(laptop => 
-          laptop._id === laptopId 
+        const updatedLaptops = laptops.map(laptop =>
+          laptop._id === laptopId
             ? { ...laptop, liked: !laptop.liked }
             : laptop
         );
@@ -57,19 +58,19 @@ const Laptops = () => {
       toast.error('Failed to update like status');
     }
   };
-  
+
   const handleAddToCart = async (laptopId) => {
     try {
-      const response = await fetch(`http://localhost:5000/products/${laptopId}/cart`, {
+      const response = await fetch(`${config.API_URL}/api/products/${laptopId}/cart`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
       });
-      
+
       if (response.ok) {
-        const updatedLaptops = laptops.map(laptop => 
-          laptop._id === laptopId 
+        const updatedLaptops = laptops.map(laptop =>
+          laptop._id === laptopId
             ? { ...laptop, inCart: !laptop.inCart }
             : laptop
         );
@@ -103,12 +104,12 @@ const Laptops = () => {
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Featured Laptops</h2>
           <p className="text-gray-600 max-w-2xl mx-auto">Discover our collection of premium laptops.</p>
         </div>
-        
+
         <div className="mb-6">
           <label className="mr-4">Sort by:</label>
-          <select 
-            value={sortBy} 
-            onChange={(e) => setSortBy(e.target.value)} 
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
             className="border rounded p-2"
             disabled={loading}
           >
@@ -116,12 +117,12 @@ const Laptops = () => {
             <option value="price">Price</option>
             <option value="rating">Rating</option>
           </select>
-          
+
           <label className="ml-6 mr-4">Filter by Brand:</label>
-          <input 
-            type="text" 
-            value={filterByBrand} 
-            onChange={(e) => setFilterByBrand(e.target.value)} 
+          <input
+            type="text"
+            value={filterByBrand}
+            onChange={(e) => setFilterByBrand(e.target.value)}
             className="border rounded p-2"
             placeholder="Enter brand name"
             disabled={loading}

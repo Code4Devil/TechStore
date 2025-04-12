@@ -3,6 +3,7 @@ import Nav from '../../Components/Nav';
 import Skeleton from '../../Components/Skeleton';
 import { toast } from 'react-toastify';
 import ProductCard from '../../Components/ProductCard';
+import config from '../../config';
 
 const Phones = () => {
   const [phones, setPhones] = useState([]);
@@ -19,7 +20,7 @@ const Phones = () => {
   const fetchPhones = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:5000/api/products');
+      const response = await fetch(`${config.API_URL}/api/products`);
       if (!response.ok) throw new Error('Failed to fetch phones');
       const data = await response.json();
       const phoneProducts = data.filter(product => product.type === 'phone');
@@ -34,24 +35,24 @@ const Phones = () => {
 
   const handleLike = async (phoneId) => {
     try {
-      const response = await fetch(`http://localhost:5000/products/${phoneId}/like`, {
+      const response = await fetch(`${config.API_URL}/api/products/${phoneId}/like`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
       });
-      
+
       if (!response.ok) throw new Error('Failed to update wishlist');
 
-      const updatedPhones = phones.map(phone => 
-        phone._id === phoneId 
+      const updatedPhones = phones.map(phone =>
+        phone._id === phoneId
           ? { ...phone, liked: !phone.liked }
           : phone
       );
       setPhones(updatedPhones);
       const currentPhone = updatedPhones.find(p => p._id === phoneId);
       toast.success(currentPhone.liked ? 'Added to wishlist' : 'Removed from wishlist');
-      
+
       // Update nav wishlist count
       const navUpdateEvent = new CustomEvent('wishlistUpdated');
       window.dispatchEvent(navUpdateEvent);
@@ -64,24 +65,24 @@ const Phones = () => {
   const handleAddToCart = async (phoneId) => {
     setAddingToCart(phoneId);
     try {
-      const response = await fetch(`http://localhost:5000/products/${phoneId}/cart`, {
+      const response = await fetch(`${config.API_URL}/api/products/${phoneId}/cart`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
       });
-      
+
       if (!response.ok) throw new Error('Failed to update cart');
 
-      const updatedPhones = phones.map(phone => 
-        phone._id === phoneId 
+      const updatedPhones = phones.map(phone =>
+        phone._id === phoneId
           ? { ...phone, inCart: !phone.inCart }
           : phone
       );
       setPhones(updatedPhones);
       const currentPhone = updatedPhones.find(p => p._id === phoneId);
       toast.success(currentPhone.inCart ? 'Added to cart' : 'Removed from cart');
-      
+
       // Update nav cart count
       const navUpdateEvent = new CustomEvent('cartUpdated');
       window.dispatchEvent(navUpdateEvent);
@@ -115,8 +116,8 @@ const Phones = () => {
         <div className="flex flex-wrap gap-4 mb-8">
           <div className="flex items-center gap-2">
             <label className="text-gray-700">Sort by:</label>
-            <select 
-              value={sortBy} 
+            <select
+              value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
               className="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >

@@ -3,6 +3,7 @@ import ProductCard from '../Components/ProductCard';
 import Skeleton from '../Components/Skeleton';
 import { toast } from 'react-toastify';
 import { useCart } from '../Context/Cart';
+import config from '../config';
 
 const FeaturedProducts = () => {
   const [products, setProducts] = useState([]);
@@ -16,7 +17,7 @@ const FeaturedProducts = () => {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:5000/api/products');
+      const response = await fetch(`${config.API_URL}/api/products`);
       if (!response.ok) throw new Error('Failed to fetch products');
       const data = await response.json();
       setProducts(data);
@@ -38,8 +39,8 @@ const FeaturedProducts = () => {
   const handleAddToCart = async (productId) => {
     const success = await addToCart(productId);
     if (success) {
-      const updatedProducts = products.map(product => 
-        product._id === productId 
+      const updatedProducts = products.map(product =>
+        product._id === productId
           ? { ...product, inCart: !product.inCart }
           : product
       );

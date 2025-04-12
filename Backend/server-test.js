@@ -16,7 +16,7 @@ const app = express();
 app.use(cors({
   origin: process.env.ALLOWED_ORIGINS ?
     process.env.ALLOWED_ORIGINS.split(',') :
-    ['http://localhost:5173', 'https://your-frontend-app-name.vercel.app'],
+    ['http://localhost:5173', 'https://your-frontend-app-name.vercel.app', 'https://ip-ecommerce.vercel.app'],
   credentials: true
 }));
 

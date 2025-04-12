@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import Nav from '../Components/Nav';
 import { getProductIconByType, getIconColorByType } from '../utils/productIcons';
+import config from '../config';
 
 const SearchResults = () => {
   const [results, setResults] = useState([]);
@@ -13,7 +14,7 @@ const SearchResults = () => {
     const fetchResults = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`http://localhost:5000/api/products/search?q=${encodeURIComponent(query)}`);
+        const response = await fetch(`${config.API_URL}/api/products/search?q=${encodeURIComponent(query)}`);
         if (!response.ok) throw new Error('Search failed');
         const data = await response.json();
         setResults(data);

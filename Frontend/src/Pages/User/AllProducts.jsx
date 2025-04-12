@@ -6,6 +6,7 @@ import { toast } from 'react-toastify';
 import Nav from '../../Components/Nav';
 import { useCart } from '../../Context/Cart';
 import { useSearch } from '../../Context/SearchContext';
+import config from '../../config';
 
 const AllProducts = () => {
   const [products, setProducts] = useState([]);
@@ -29,7 +30,7 @@ const AllProducts = () => {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:5000/api/products');
+      const response = await fetch(`${config.API_URL}/api/products`);
       if (!response.ok) throw new Error('Failed to fetch products');
       const data = await response.json();
       setProducts(data);
