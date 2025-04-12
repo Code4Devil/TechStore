@@ -2,7 +2,7 @@ services:
   - type: web
     name: ecommerce-backend
     env: node
-    buildCommand: npm install && npm rebuild bcrypt --build-from-source
+    buildCommand: npm install
     startCommand: node server-test.js
     envVars:
       - key: MONGO_URI
@@ -11,3 +11,5 @@ services:
         sync: false
       - key: PORT
         value: 10000
+      - key: ALLOWED_ORIGINS
+        sync: false
